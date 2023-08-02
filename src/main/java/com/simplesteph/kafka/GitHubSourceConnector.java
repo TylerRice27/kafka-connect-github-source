@@ -29,6 +29,8 @@ public class GitHubSourceConnector extends SourceConnector {
         return GitHubSourceTask.class;
     }
 
+    // Note tasksConfigs is where you will add multiple tasks to your connector.
+    // Also this is probably most of where your logic will go
     @Override
     public List<Map<String, String>> taskConfigs(int i) {
         // Define the individual task configurations that will be executed.
@@ -41,6 +43,9 @@ public class GitHubSourceConnector extends SourceConnector {
     public void stop() {
         // Do things that are necessary to stop your connector.
         // nothing is necessary to stop for this connector
+        // NOTE a good thing to do might be to STOP/CLOSE a database connection when you
+        // call stop
+        // in your code
     }
 
     @Override
