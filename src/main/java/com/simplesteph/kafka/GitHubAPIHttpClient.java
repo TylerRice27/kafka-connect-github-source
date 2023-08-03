@@ -27,11 +27,12 @@ public class GitHubAPIHttpClient {
 
     GitHubSourceConnectorConfig config;
 
-    public static final String X_RATELIMIT_LIMIT_HEADER="X-RateLimit-Limit";
-    public static final String X_RATELIMIT_REMAINING_HEADER="X-RateLimit-Remaining";
-    public static final String X_RATELIMIT_RESET_HEADER="X-RateLimit-Reset";
+    public static final String X_RATELIMIT_LIMIT_HEADER = "X-RateLimit-Limit";
+    public static final String X_RATELIMIT_REMAINING_HEADER = "X-RateLimit-Remaining";
+    public static final String X_RATELIMIT_RESET_HEADER = "X-RateLimit-Reset";
 
-    public GitHubAPIHttpClient(GitHubSourceConnectorConfig config){
+    // Basic Constructor
+    public GitHubAPIHttpClient(GitHubSourceConnectorConfig config) {
         this.config = config;
     }
 
@@ -46,7 +47,8 @@ public class GitHubAPIHttpClient {
             XRateLimit = Integer.valueOf(headers.getFirst(X_RATELIMIT_LIMIT_HEADER));
             XRateRemaining = Integer.valueOf(headers.getFirst(X_RATELIMIT_REMAINING_HEADER));
             XRateReset = Integer.valueOf(headers.getFirst(X_RATELIMIT_RESET_HEADER));
-            switch (jsonResponse.getStatus()){
+            // NOTE You can use a switch case depending on your status code
+            switch (jsonResponse.getStatus()) {
                 case 200:
                     return jsonResponse.getBody().getArray();
                 case 401:
@@ -59,7 +61,7 @@ public class GitHubAPIHttpClient {
                     log.info(String.format("The limit will reset at %s",
                             LocalDateTime.ofInstant(Instant.ofEpochSecond(XRateReset), ZoneOffset.systemDefault())));
                     long sleepTime = XRateReset - Instant.now().getEpochSecond();
-                    log.info(String.format("Sleeping for %s seconds", sleepTime ));
+                    log.info(String.format("Sleeping for %s seconds", sleepTime));
                     Thread.sleep(1000 * sleepTime);
                     return getNextIssues(page, since);
                 default:
@@ -79,16 +81,17 @@ public class GitHubAPIHttpClient {
         }
     }
 
+    // NOTE we use the unirest here which is a Java Library
     protected HttpResponse<JsonNode> getNextIssuesAPI(Integer page, Instant since) throws UnirestException {
         GetRequest unirest = Unirest.get(constructUrl(page, since));
-        if (!config.getAuthUsername().isEmpty() && !config.getAuthPassword().isEmpty() ){
+        if (!config.getAuthUsername().isEmpty() && !config.getAuthPassword().isEmpty()) {
             unirest = unirest.basicAuth(config.getAuthUsername(), config.getAuthPassword());
         }
         log.debug(String.format("GET %s", unirest.getUrl()));
         return unirest.asJson();
     }
 
-    protected String constructUrl(Integer page, Instant since){
+    protected String constructUrl(Integer page, Instant since) {
         return String.format(
                 "https://api.github.com/repos/%s/%s/issues?page=%s&per_page=%s&since=%s&state=all&direction=asc&sort=updated",
                 config.getOwnerConfig(),
@@ -101,7 +104,7 @@ public class GitHubAPIHttpClient {
     public void sleep() throws InterruptedException {
         long sleepTime = (long) Math.ceil(
                 (double) (XRateReset - Instant.now().getEpochSecond()) / XRateRemaining);
-        log.debug(String.format("Sleeping for %s seconds", sleepTime ));
+        log.debug(String.format("Sleeping for %s seconds", sleepTime));
         Thread.sleep(1000 * sleepTime);
     }
 
