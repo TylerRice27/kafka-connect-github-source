@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.*;
 import static com.simplesteph.kafka.GitHubSchemas.*;
 
-
 public class GitHubSourceTask extends SourceTask {
     private static final Logger log = LoggerFactory.getLogger(GitHubSourceTask.class);
     public GitHubSourceConnectorConfig config;
@@ -37,7 +36,8 @@ public class GitHubSourceTask extends SourceTask {
 
     @Override
     public void start(Map<String, String> map) {
-        //Do things here that are required to start your task. This could be open a connection to a database, etc.
+        // Do things here that are required to start your task. This could be open a
+        // connection to a database, etc.
         config = new GitHubSourceConnectorConfig(map);
         initializeLastVariables();
         gitHubHttpAPIClient = new GitHubAPIHttpClient(config);
@@ -45,12 +45,14 @@ public class GitHubSourceTask extends SourceTask {
 
     Map<String, Object> lastSourceOffset;
 
-    private void initializeLastVariables(){
+    private void initializeLastVariables() {
         String jsonOffsetData = new Gson().toJson(lastSourceOffset);
-        // TypeToken preserves the generic type information of the Map when deserializing the JSON string.
-        TypeToken<Map<String, Object>> typeToken = new TypeToken<Map<String, Object>>() {};
+        // TypeToken preserves the generic type information of the Map when
+        // deserializing the JSON string.
+        TypeToken<Map<String, Object>> typeToken = new TypeToken<Map<String, Object>>() {
+        };
         Map<String, Object> offsetData = new Gson().fromJson(jsonOffsetData, typeToken.getType());
-        if( offsetData == null){
+        if (offsetData == null) {
             // we haven't fetched anything yet, so we initialize to 7 days ago
             nextQuerySince = config.getSince();
             lastIssueNumber = -1;
@@ -58,13 +60,13 @@ public class GitHubSourceTask extends SourceTask {
             Object updatedAt = offsetData.get(UPDATED_AT_FIELD);
             Object issueNumber = offsetData.get(NUMBER_FIELD);
             Object nextPage = offsetData.get(NEXT_PAGE_FIELD);
-            if(updatedAt != null && (updatedAt instanceof String)){
+            if (updatedAt != null && (updatedAt instanceof String)) {
                 nextQuerySince = Instant.parse((String) updatedAt);
             }
-            if(issueNumber != null && (issueNumber instanceof String)){
+            if (issueNumber != null && (issueNumber instanceof String)) {
                 lastIssueNumber = Integer.valueOf((String) issueNumber);
             }
-            if (nextPage != null && (nextPage instanceof String)){
+            if (nextPage != null && (nextPage instanceof String)) {
                 nextPageToVisit = Integer.valueOf((String) nextPage);
             }
         }
@@ -86,12 +88,12 @@ public class GitHubSourceTask extends SourceTask {
             i += 1;
             lastUpdatedAt = issue.getUpdatedAt();
         }
-        if (i > 0) log.info(String.format("Fetched %s record(s)", i));
-        if (i == 100){
+        if (i > 0)
+            log.info(String.format("Fetched %s record(s)", i));
+        if (i == 100) {
             // we have reached a full batch, we need to get the next one
             nextPageToVisit += 1;
-        }
-        else {
+        } else {
             nextQuerySince = lastUpdatedAt.plusSeconds(1);
             nextPageToVisit = 1;
             gitHubHttpAPIClient.sleep();
@@ -126,12 +128,14 @@ public class GitHubSourceTask extends SourceTask {
 
     private Map<String, String> sourceOffset(Instant updatedAt) {
         Map<String, String> map = new HashMap<>();
+        // The Value that was last updated or read
         map.put(UPDATED_AT_FIELD, DateUtils.MaxInstant(updatedAt, nextQuerySince).toString());
+        // What message to read from next
         map.put(NEXT_PAGE_FIELD, nextPageToVisit.toString());
         return map;
     }
 
-    private Struct buildRecordKey(Issue issue){
+    private Struct buildRecordKey(Issue issue) {
         // Key Schema
         Struct key = new Struct(KEY_SCHEMA)
                 .put(OWNER_FIELD, config.getOwnerConfig())
@@ -141,7 +145,7 @@ public class GitHubSourceTask extends SourceTask {
         return key;
     }
 
-    public Struct buildRecordValue(Issue issue){
+    public Struct buildRecordValue(Issue issue) {
 
         // Issue top level fields
         Struct valueStruct = new Struct(VALUE_SCHEMA)
