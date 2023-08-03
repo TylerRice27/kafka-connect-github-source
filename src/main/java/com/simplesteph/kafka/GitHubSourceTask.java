@@ -45,6 +45,7 @@ public class GitHubSourceTask extends SourceTask {
 
     Map<String, Object> lastSourceOffset;
 
+    // 2nd Most important section of the code
     private void initializeLastVariables() {
         String jsonOffsetData = new Gson().toJson(lastSourceOffset);
         // TypeToken preserves the generic type information of the Map when
@@ -72,6 +73,7 @@ public class GitHubSourceTask extends SourceTask {
         }
     }
 
+    // Most important aspect of the code
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         gitHubHttpAPIClient.sleepIfNeed();
@@ -81,6 +83,9 @@ public class GitHubSourceTask extends SourceTask {
         JSONArray issues = gitHubHttpAPIClient.getNextIssues(nextPageToVisit, nextQuerySince);
         // we'll count how many results we get with i
         int i = 0;
+        // A for loop that grabs each issue has a JSON object, then turns into a
+        // sourceRecord and adds that
+        // to my list of records array
         for (Object obj : issues) {
             Issue issue = Issue.fromJson((JSONObject) obj);
             SourceRecord sourceRecord = generateSourceRecord(issue);
@@ -106,6 +111,7 @@ public class GitHubSourceTask extends SourceTask {
                 sourcePartition(),
                 sourceOffset(issue.getUpdatedAt()),
                 config.getTopic(),
+                // NOTE the partition has to be null, don't set the partition yourself
                 null, // partition will be inferred by the framework
                 KEY_SCHEMA,
                 buildRecordKey(issue),
