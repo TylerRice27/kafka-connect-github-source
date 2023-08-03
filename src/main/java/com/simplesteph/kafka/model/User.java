@@ -56,7 +56,10 @@ public class User {
      * @param organizationsUrl
      * @param starredUrl
      */
-    public User(String login, Integer id, String avatarUrl, String gravatarId, String url, String htmlUrl, String followersUrl, String followingUrl, String gistsUrl, String starredUrl, String subscriptionsUrl, String organizationsUrl, String reposUrl, String eventsUrl, String receivedEventsUrl, String type, Boolean siteAdmin) {
+    public User(String login, Integer id, String avatarUrl, String gravatarId, String url, String htmlUrl,
+            String followersUrl, String followingUrl, String gistsUrl, String starredUrl, String subscriptionsUrl,
+            String organizationsUrl, String reposUrl, String eventsUrl, String receivedEventsUrl, String type,
+            Boolean siteAdmin) {
         super();
         this.login = login;
         this.id = id;
@@ -311,6 +314,8 @@ public class User {
         return this;
     }
 
+    // NOTE here we are getting a JSON object and then parsing that information into
+    // a new User Object
     public static User fromJson(JSONObject jsonObject) {
         User user = new User();
         user.setUrl(jsonObject.getString(USER_URL_FIELD));

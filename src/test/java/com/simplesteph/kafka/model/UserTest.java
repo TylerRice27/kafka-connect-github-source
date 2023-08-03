@@ -27,13 +27,15 @@ public class UserTest {
             "\"site_admin\": false\n" +
             "}";
 
+    // This line takes the string above and turns then into a JSON object
     private JSONObject userJson = new JSONObject(userStr);
 
-
+    // Then this runs a tests on the JSON object to make sure the fields come back
+    // correctly
     @Test
-    public void canParseJson(){
+    public void canParseJson() {
         User user = User.fromJson(userJson);
-        assertEquals(user.getId(),(Integer) 20851561);
+        assertEquals(user.getId(), (Integer) 20851561);
         assertEquals(user.getUrl(), "https://api.github.com/users/simplesteph");
         assertEquals(user.getLogin(), "simplesteph");
     }

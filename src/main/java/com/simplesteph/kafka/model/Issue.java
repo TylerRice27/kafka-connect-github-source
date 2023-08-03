@@ -68,7 +68,10 @@ public class Issue {
      * @param user
      * @param comments
      */
-    public Issue(Integer id, String url, String repositoryUrl, String labelsUrl, String commentsUrl, String eventsUrl, String htmlUrl, Integer number, String state, String title, String body, User user, List<Label> labels, Assignee assignee, Milestone milestone, Boolean locked, Integer comments, PullRequest pullRequest, Object closedAt, Instant createdAt, Instant updatedAt, List<Assignee> assignees) {
+    public Issue(Integer id, String url, String repositoryUrl, String labelsUrl, String commentsUrl, String eventsUrl,
+            String htmlUrl, Integer number, String state, String title, String body, User user, List<Label> labels,
+            Assignee assignee, Milestone milestone, Boolean locked, Integer comments, PullRequest pullRequest,
+            Object closedAt, Instant createdAt, Instant updatedAt, List<Assignee> assignees) {
         super();
         this.id = id;
         this.url = url;
@@ -395,6 +398,7 @@ public class Issue {
 
     public static Issue fromJson(JSONObject jsonObject) {
 
+        // NOTE here we parse all the top level fields
         Issue issue = new Issue();
         issue.withUrl(jsonObject.getString(URL_FIELD));
         issue.withHtmlUrl(jsonObject.getString(HTML_URL_FIELD));
@@ -404,12 +408,13 @@ public class Issue {
         issue.withNumber(jsonObject.getInt(NUMBER_FIELD));
         issue.withState(jsonObject.getString(STATE_FIELD));
 
+        // NOTE we get sub object user which is nested in our data
         // user is mandatory
         User user = User.fromJson(jsonObject.getJSONObject(USER_FIELD));
         issue.withUser(user);
 
         // pull request is an optional fields
-        if (jsonObject.has(PR_FIELD)){
+        if (jsonObject.has(PR_FIELD)) {
             PullRequest pullRequest = PullRequest.fromJson(jsonObject.getJSONObject(PR_FIELD));
             issue.withPullRequest(pullRequest);
         }
